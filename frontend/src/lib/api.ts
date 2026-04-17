@@ -12,10 +12,40 @@ import type {
   TutorStartResponse,
 } from "./types";
 
+function normalizeApiBaseUrl(value: string) {
+  return value.trim().replace(/^['"]+|['"]+$/g, "").replace(/\/+$/, "");
+}
+
+function parseConfiguredApiBaseUrl(value: string) {
+  const normalized = normalizeApiBaseUrl(value);
+  if (!normalized) {
+    return "";
+  }
+
+  if (normalized.startsWith("[") || normalized.startsWith('"')) {
+    try {
+      const parsed = JSON.parse(normalized) as unknown;
+      if (typeof parsed === "string") {
+        return normalizeApiBaseUrl(parsed);
+      }
+      if (Array.isArray(parsed)) {
+        const firstUrl = parsed.find((item): item is string => typeof item === "string" && item.trim().length > 0);
+        if (firstUrl) {
+          return normalizeApiBaseUrl(firstUrl);
+        }
+      }
+    } catch {
+      // Fall through to string cleanup below for partially malformed values.
+    }
+  }
+
+  return normalized.replace(/^\[(.+)\]$/, "$1").replace(/^['"]+|['"]+$/g, "");
+}
+
 function resolveApiBaseUrl() {
   const configured = import.meta.env.VITE_API_BASE_URL?.trim();
   if (configured) {
-    return configured.replace(/\/+$/, "");
+    return parseConfiguredApiBaseUrl(configured);
   }
 
   if (typeof window !== "undefined") {
