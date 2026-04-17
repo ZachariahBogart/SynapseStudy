@@ -29,6 +29,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.get("/")
+def root() -> dict:
+    return {"name": settings.app_name, "status": "ok", "health": "/health"}
+
+
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}

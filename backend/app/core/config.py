@@ -1,14 +1,20 @@
 from __future__ import annotations
 
+import json
 from functools import lru_cache
 from pathlib import Path
 
 from pydantic import Field
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = BACKEND_DIR / "data"
+
+
+def _normalize_origin(value: str) -> str:
+    return value.strip().strip("'\"").rstrip("/")
 
 
 class Settings(BaseSettings):
@@ -30,6 +36,33 @@ class Settings(BaseSettings):
     redis_url: str | None = None
     default_user_id: str = "demo-student"
     default_user_name: str = "Demo Student"
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, value: object) -> object:
+        if value is None:
+            return value
+
+        if isinstance(value, str):
+            raw = value.strip()
+            if not raw:
+                return []
+
+            try:
+                parsed = json.loads(raw)
+            except json.JSONDecodeError:
+                return [_normalize_origin(part) for part in raw.split(",") if _normalize_origin(part)]
+
+            if isinstance(parsed, str):
+                return [_normalize_origin(parsed)] if _normalize_origin(parsed) else []
+            if isinstance(parsed, list):
+                return [_normalize_origin(item) for item in parsed if isinstance(item, str) and _normalize_origin(item)]
+            raise ValueError("AI_STUDY_CORS_ORIGINS must be a string or list of strings.")
+
+        if isinstance(value, (list, tuple, set)):
+            return [_normalize_origin(item) for item in value if isinstance(item, str) and _normalize_origin(item)]
+
+        return value
 
 
 @lru_cache
