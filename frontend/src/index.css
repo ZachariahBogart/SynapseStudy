@@ -1,0 +1,56 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #11212d;
+  background:
+    radial-gradient(circle at top left, rgba(240, 138, 93, 0.28), transparent 32%),
+    radial-gradient(circle at 85% 15%, rgba(28, 124, 125, 0.22), transparent 28%),
+    linear-gradient(180deg, #fbf4ea 0%, #f5ede1 48%, #efe5d7 100%);
+  font-family: "Space Grotesk", sans-serif;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  color: #11212d;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.glass-panel {
+  @apply rounded-[28px] border border-white/70 bg-white/70 shadow-glow backdrop-blur-xl;
+}
+
+.section-title {
+  @apply font-display text-3xl tracking-tight text-ink md:text-4xl;
+}
+
+.subtle-grid {
+  background-image:
+    linear-gradient(rgba(17, 33, 45, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 33, 45, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.tab-chip {
+  @apply rounded-full border border-white/70 px-4 py-2 text-sm font-medium transition;
+}
+
+.tab-chip-active {
+  @apply bg-ink text-white shadow-lg;
+}
+
+.tab-chip-idle {
+  @apply bg-white/60 text-ink hover:bg-white;
+}
+
+.meter-bar {
+  @apply h-2 overflow-hidden rounded-full bg-ink/10;
+}

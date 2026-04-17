@@ -1,0 +1,24 @@
+Metadata-Version: 2.4
+Name: synapse-study-api
+Version: 0.1.0
+Summary: FastAPI backend for the Synapse Study app
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: dramatiq[redis]<2.0,>=1.17.1
+Requires-Dist: fastapi<1.0,>=0.115.0
+Requires-Dist: pydantic-settings<3.0,>=2.6.1
+Requires-Dist: pypdf<6.0,>=5.1.0
+Requires-Dist: python-dotenv<2.0,>=1.0.1
+Requires-Dist: python-multipart<1.0,>=0.0.12
+Requires-Dist: python-pptx<2.0,>=1.0.2
+Requires-Dist: redis<6.0,>=5.2.0
+Requires-Dist: sqlalchemy<3.0,>=2.0.36
+Requires-Dist: uvicorn[standard]<1.0,>=0.32.0
+Provides-Extra: dev
+Requires-Dist: httpx<1.0,>=0.28.1; extra == "dev"
+Requires-Dist: pytest<9.0,>=8.3.3; extra == "dev"
+Requires-Dist: reportlab<5.0,>=4.2.5; extra == "dev"
+
+# Backend
+
+FastAPI API for Synapse Study. It ingests PDF and PPTX course materials, generates course topics and study items, and exposes tutor, flashcard, quiz, and guided-learning endpoints.
