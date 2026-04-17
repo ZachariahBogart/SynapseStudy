@@ -12,7 +12,24 @@ import type {
   TutorStartResponse,
 } from "./types";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+function resolveApiBaseUrl() {
+  const configured = import.meta.env.VITE_API_BASE_URL?.trim();
+  if (configured) {
+    return configured.replace(/\/+$/, "");
+  }
+
+  if (typeof window !== "undefined") {
+    const { hostname, origin } = window.location;
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return "http://localhost:8000";
+    }
+    return origin;
+  }
+
+  return "http://localhost:8000";
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 type RequestOptions = Omit<RequestInit, "body"> & {
   profile: Profile;
@@ -32,15 +49,38 @@ async function request<T>(path: string, options: RequestOptions): Promise<T> {
     body = JSON.stringify(options.body);
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-    body,
-  });
+  const requestUrl = `${API_BASE_URL}${path}`;
+  let response: Response;
+  try {
+    response = await fetch(requestUrl, {
+      ...options,
+      headers,
+      body,
+    });
+  } catch (error) {
+    const details =
+      error instanceof Error && error.message ? error.message : "Network error while contacting the API.";
+    throw new Error(
+      `Could not reach the API at ${requestUrl}. ${details} If this site is hosted, set VITE_API_BASE_URL to your backend URL or proxy /api to the backend.`,
+    );
+  }
 
   if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || "Request failed.");
+    const rawMessage = await response.text();
+    let message = rawMessage.trim();
+
+    if (message) {
+      try {
+        const parsed = JSON.parse(message) as { detail?: string };
+        if (typeof parsed.detail === "string" && parsed.detail.trim()) {
+          message = parsed.detail.trim();
+        }
+      } catch {
+        message = rawMessage.trim();
+      }
+    }
+
+    throw new Error(message || `Request failed (${response.status}) at ${requestUrl}.`);
   }
 
   return response.json() as Promise<T>;
